@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報廢程序 - 臺灣新鈳電子股份有限公司</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/ogl@0.0.121/dist/ogl.umd.min.js"></script>
+    <!-- 添加 Chart.js 用於互動式流程圖表 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #00ffff;  /* 霓虹青色 */
+            --secondary-color: #ff00ff; /* 霓虹品紅色 */
+            --accent-color: #ffff00;    /* 霓虹黃色 */
+            --dark-bg: #0a0a1a;         /* 深色背景 */
+            --card-bg: rgba(20, 20, 40, 0.8); /* 卡片背景 */
+            --text-color: #e0e0ff;      /* 淺色文字 */
+            --border-color: rgba(0, 255, 255, 0.3);
+            --card-shadow: 0 10px 25px -5px rgba(0, 255, 255, 0.1);
+            --hover-shadow: 0 20px 35px -10px rgba(0, 255, 255, 0.2);
+            --tech-gradient: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            --neon-glow: 0 0 10px rgba(0, 255, 255, 0.7), 0 0 20px rgba(0, 255, 255, 0.5), 0 0 30px rgba(0, 255, 255, 0.3);
+            --grid-pattern: linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image: var(--grid-pattern);
+            background-size: 30px 30px;
+            color: var(--text-color);
+            font-size: 18px;
+            line-height: 2.0;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 粒子背景 */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: var(--tech-gradient);
+            box-shadow: var(--neon-glow);
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            width: 100%;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 0.3s;
+        }
+
+        .company-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.15);
+            padding: 10px;
+            background: rgba(20, 20, 40, 0.8);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .company-logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: var(--neon-glow);
+        }
+
+        .company-logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: var(--tech-gradient);
+            z-index: -1;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .company-logo:hover::before {
+            transform: scale(1);
+            opacity: 0.2;
+        }
+
+        .company-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .company-name {
+            font-size: 42px;
+            font-weight: 700;
+            background: var(--tech-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(0, 255, 255, 0.1);
+            margin-bottom: 10px;
+            position: relative;
+            padding: 10px 20px;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 0.6s;
+        }
+
+        .company-name:hover {
+            text-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .company-name::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: var(--tech-gradient);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+            border-radius: 3px;
+        }
+
+        .company-name:hover::after {
+            transform: scaleX(1);
+        }
+
+        .system-name {
+            font-size: 28px;
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.08);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 0.9s;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        .system-name:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
+            color: var(--primary-color);
+        }
+
+        .intro {
+            background-color: var(--card-bg);
+            padding: 60px 40px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 50px;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .intro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--tech-gradient);
+            box-shadow: var(--neon-glow);
+        }
+
+        .intro::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300ffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .intro:hover {
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-3px);
+        }
+
+        #prism-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.8;
+        }
+
+        .title {
+            font-size: 52px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 20px;
+            display: inline-block;
+            letter-spacing: 1px;
+            z-index: 1;
+            animation: pulse 3s infinite ease-in-out;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 5px;
+            background: var(--tech-gradient);
+            border-radius: 3px;
+            box-shadow: var(--neon-glow);
+        }
+
+        .subtitle {
+            font-size: 21px;
+            color: var(--text-color);
+            max-width: 1100px;
+            margin: 0 auto;
+            line-height: 2.0;
+            z-index: 1;
+            position: relative;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 40px;
+            margin-bottom: 40px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--tech-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+            box-shadow: var(--neon-glow);
+        }
+
+        .card:hover {
+            transform: translateY(-8px) rotateX(5deg);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300ffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-title i {
+            color: var(--accent-color);
+            font-size: 32px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 0, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .card-title i {
+            transform: rotate(5deg);
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 50px 0 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--tech-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 0.2) 50%, rgba(0, 255, 255, 0) 100%);
+            bottom: -5px;
+            left: 0;
+        }
+
+        .section-title i {
+            color: var(--accent-color);
+            font-size: 34px;
+            background: rgba(255, 255, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(255, 255, 0, 0.1);
+        }
+
+        .process-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .process-steps::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: var(--tech-gradient);
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 250px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            border-left: 5px solid var(--primary-color);
+            transition: all 0.4s;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -20px;
+            width: 15px;
+            height: 15px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step:hover {
+            background: rgba(30, 30, 60, 0.8);
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-5px);
+        }
+
+        .step:hover::after {
+            opacity: 1;
+        }
+
+        .step-number {
+            background: var(--tech-gradient);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-weight: bold;
+            font-size: 22px;
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+            position: relative;
+            z-index: 3;
+        }
+
+        .step-number::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--tech-gradient);
+            opacity: 0.2;
+            top: -5px;
+            left: -5px;
+            z-index: -1;
+        }
+
+        .step h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .step p {
+            font-size: 18px;
+            line-height: 2.0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 40px 0;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 22px 25px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 18px;
+            line-height: 2.0;
+        }
+
+        th {
+            background: var(--tech-gradient);
+            color: white;
+            font-weight: 600;
+            position: relative;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .table-container:hover th::after {
+            transform: scaleX(1);
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(30, 30, 60, 0.5);
+        }
+
+        tr:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+            transform: translateX(5px);
+            transition: all 0.3s;
+        }
+
+        .qa-item {
+            margin-bottom: 30px;
+            border-left: 5px solid var(--secondary-color);
+            padding: 25px;
+            transition: all 0.4s;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .qa-item:hover {
+            border-left-color: var(--accent-color);
+            background: rgba(255, 255, 0, 0.05);
+            padding-left: 30px;
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-3px);
+        }
+
+        .qa-question {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+
+        .qa-answer {
+            color: var(--text-color);
+            line-height: 2.0;
+            font-size: 18px;
+        }
+
+        .form-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .form-link {
+            display: flex;
+            align-items: center;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.4s;
+            border-left: 5px solid var(--accent-color);
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--tech-gradient);
+            opacity: 0;
+            transform: translate(50%, -50%) rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .form-link:hover {
+            background: var(--tech-gradient);
+            color: white;
+            transform: translateY(-8px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .form-link:hover::before {
+            opacity: 0.1;
+            transform: translate(30%, -30%) rotate(45deg);
+        }
+
+        .form-icon {
+            margin-right: 25px;
+            font-size: 34px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--primary-color);
+            box-shadow: 0 3px 10px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .form-link:hover .form-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .form-info {
+            z-index: 1;
+            position: relative;
+        }
+
+        .form-info h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .form-info p {
+            font-size: 17px;
+            color: var(--text-color);
+            line-height: 2.0;
+        }
+
+        .form-link:hover .form-info p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 30px;
+            margin-top: 80px;
+            border-top: 2px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 18px;
+            background: var(--card-bg);
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 -5px 20px rgba(0, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+            line-height: 2.0;
+            backdrop-filter: blur(10px);
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--tech-gradient);
+        }
+
+        footer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300ffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .ste-name-img {
+            height: 70px;
+            object-fit: contain;
+            box-shadow: 0 3px 10px rgba(0, 255, 255, 0.1);
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-right: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ste-name-img:hover {
+            transform: scale(1.05);
+            box-shadow: var(--neon-glow);
+        }
+
+        .highlight {
+            background: var(--tech-gradient);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .highlight:hover {
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 子項樣式調整 */
+        .sub-item {
+            margin: 30px 0 0 20px;
+            padding-left: 20px;
+            border-left: 2px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .sub-item h4 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sub-item h4 i {
+            color: var(--accent-color);
+            font-size: 26px;
+        }
+
+        /* 可收合式對話框樣式 */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible-header:hover {
+            transform: translateX(5px);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            color: var(--primary-color);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            padding-left: 10px;
+        }
+
+        .collapsible-content.active {
+            max-height: 2000px; /* 足夠大的值以容納所有內容 */
+            padding: 15px 10px 25px;
+        }
+
+        .collapsible-header.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 互動式流程樣式 */
+        .interactive-flow-container {
+            margin: 50px 0;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 40px;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .interactive-flow-container h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--tech-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .interactive-flow-container h2::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 0.2) 50%, rgba(0, 255, 255, 0) 100%);
+            bottom: -5px;
+            left: 0;
+        }
+
+        .interactive-flow-container h2 i {
+            color: var(--accent-color);
+            font-size: 34px;
+            background: rgba(255, 255, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(255, 255, 0, 0.1);
+        }
+
+        .flow-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .flow-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .flow-header p {
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .asset-selection {
+            margin-bottom: 30px;
+        }
+
+        .asset-selection h2 {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .asset-selection p {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        .selection-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .selection-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .selection-btn:hover {
+            background: var(--primary-color);
+            color: var(--dark-bg);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 255, 255, 0.2);
+        }
+
+        .selection-btn.active {
+            background: var(--primary-color);
+            color: var(--dark-bg);
+        }
+
+        .process-flow-display {
+            margin-bottom: 30px;
+        }
+
+        .flow-placeholder {
+            text-align: center;
+            color: var(--text-color);
+            padding: 40px 20px;
+            background: rgba(30, 30, 60, 0.5);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .process-flow {
+            display: none;
+        }
+
+        .process-flow.active {
+            display: block;
+        }
+
+        .process-flow h3 {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .flow-step {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 調整步驟標記的樣式 */
+        .flow-step .step-number {
+            display: inline-block;
+            background: var(--tech-gradient);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            white-space: nowrap;
+            min-width: 70px;
+            box-shadow: 0 3px 8px rgba(0, 255, 255, 0.2);
+        }
+
+        /* 對於特殊標記（如"特別要求"）使用更大的尺寸 */
+        .flow-step .step-number.special {
+            padding: 10px 18px;
+            font-size: 15px;
+            min-width: 90px;
+        }
+
+        .flow-step h4 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .flow-step p {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .flow-connector {
+            position: relative;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .flow-connector::after {
+            content: '▼';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -1.75rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .choice-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .choice-btn.yes {
+            background: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        .choice-btn.no {
+            background: #f87171;
+            color: white;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden-step {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .visible-step {
+            max-height: 500px;
+        }
+
+        .common-disposal {
+            background: rgba(30, 30, 60, 0.5);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .common-disposal.active {
+            display: block;
+        }
+
+        .common-disposal h2 {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .common-disposal p {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .disposal-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .disposal-method {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-top: 4px solid;
+            backdrop-filter: blur(10px);
+        }
+
+        .disposal-method h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .disposal-method p {
+            text-align: left;
+            color: var(--text-color);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .disposal-method.sell {
+            border-top-color: var(--accent-color);
+        }
+
+        .disposal-method.pay {
+            border-top-color: #f87171;
+        }
+
+        .disposal-method.destroy {
+            border-top-color: #60a5fa;
+        }
+
+        .disposal-method.offset {
+            border-top-color: #94a3b8;
+        }
+
+        @media (max-width: 992px) {
+            .company-logo {
+                width: 100px;
+                height: 100px;
+            }
+            .company-name {
+                font-size: 36px;
+            }
+            .title {
+                font-size: 46px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .process-steps {
+                flex-direction: column;
+            }
+            
+            .process-steps::before {
+                display: none;
+            }
+            
+            .form-links {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                padding: 20px 0;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+                gap: 15px;
+            }
+
+            .company-logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .company-name {
+                font-size: 28px;
+            }
+
+            .system-name {
+                font-size: 22px;
+            }
+
+            .title {
+                font-size: 38px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 20px;
+                padding: 30px 15px;
+            }
+            
+            footer .ste-name-img {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            body, .step p, .qa-answer, th, td {
+                font-size: 17px;
+            }
+            .subtitle, .form-info p {
+                font-size: 19px;
+            }
+
+            .sub-item {
+                margin-left: 10px;
+                padding-left: 10px;
+            }
+
+            .selection-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .selection-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .disposal-methods {
+                grid-template-columns: 1fr;
+            }
+
+            /* 在行動裝置上調整步驟標記 */
+            .flow-step .step-number {
+                padding: 6px 12px;
+                font-size: 13px;
+                min-width: 60px;
+            }
+
+            .flow-step .step-number.special {
+                padding: 8px 14px;
+                font-size: 14px;
+                min-width: 80px;
+            }
+        }
+
+        .card, .section-title, .table-container, .form-link, .qa-item, .interactive-flow-container {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .card.visible, .section-title.visible, .table-container.visible, .form-link.visible, .qa-item.visible, .interactive-flow-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:nth-child(1) { transition-delay: 0.1s; }
+        .card:nth-child(2) { transition-delay: 0.2s; }
+        .card:nth-child(3) { transition-delay: 0.3s; }
+        .form-link:nth-child(1) { transition-delay: 0.1s; }
+        .form-link:nth-child(2) { transition-delay: 0.2s; }
+        .form-link:nth-child(3) { transition-delay: 0.3s; }
+        .form-link:nth-child(4) { transition-delay: 0.4s; }
+        .form-link:nth-child(5) { transition-delay: 0.5s; }
+
+        /* 動畫效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 2px 10px rgba(0, 255, 255, 0.1);
+            }
+            50% {
+                transform: scale(1.03);
+                text-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* 霓虹文字效果 */
+        .neon-text {
+            color: #fff;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 15px var(--primary-color),
+                0 0 20px var(--primary-color),
+                0 0 25px var(--primary-color);
+        }
+
+        /* 3D 卡片效果增強 */
+        .card-3d {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .card-3d:hover {
+            transform: rotateY(5deg) rotateX(5deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景容器 -->
+    <div id="particles-js"></div>
+    
+    <div class="container">
+        <!-- 頭部：已調整為居中顯示並增加動態效果 -->
+        <header>
+            <div class="logo-container">
+                <img src="https://i.urusai.cc/Qlsat.png" alt="台灣新鈳電子LOGO" class="company-logo floating">
+                <div class="company-info">
+                    <div class="company-name">臺灣新鈳電子股份有限公司</div>
+                    <div class="system-name">報廢程序說明</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主標題區塊：已更新副標題文字 -->
+        <section class="intro">
+            <div id="prism-container"></div>
+            <h1 class="title neon-text">報廢程序</h1>
+            <p class="subtitle">確保公司資產和專案設備能被有效利用，並為那些確定無法再使用的財物提供一個依循的報廢流程，符合《ISO9001:2015 Q3003》、財務部程序《STE-FAD-PM-001》第四章《財務準則及程序》第五節《固定資產管理》、總公司《GITP-7 IT End User Policy》及 ITD《STE-IT-PM-001》等相關規定辦理。</p>
+        </section>
+
+        <section class="card card-3d">
+            <h2 class="card-title"><i class="fas fa-bullseye"></i> 報廢目的與基本原則</h2>
+            <p><strong>目的：</strong> 確保公司資產和專案設備能被有效利用，並為那些確定無法再使用的財物提供一個依循的報廢流程，避免資源浪費。</p>
+            <p><strong>基本原則：</strong> 分類處置、流程規範、資料完整、符合環保與財務法規。</p>
+        </section>
+
+        <section>
+            <h2 class="section-title"><i class="fas fa-sitemap"></i> 報廢物件的分類與處理路徑</h2>
+            
+            <div class="card card-3d">
+                <h3 class="card-title"><i class="fas fa-industry"></i> A. 專案類/在建工程廢料 (WIP Scrap Material)</h3>
+                <p><strong>定義：</strong> 專案購買的材料、設備，可能已過保固或損壞，且已失去原有固有效能。</p>
+                
+                <h4>路徑 (A1) 評估再利用</h4>
+                <p>如果使用單位評估該物件或其部分附屬設備<span class="highlight">仍適合</span>用於其他專案或有其他用途。</p>
+                <ul>
+                    <li><strong>程序：</strong> 需填寫 <strong>QAD-27 B </strong>《在建工程餘料再利用評估申請書》。</li>
+                    <li><strong>後續：</strong> 轉請財務部填寫原始成本，並由他案專案經理確認有用後，辦理在建工程餘料轉移，留置備用。</li>
+                </ul>
+                
+                <h4>路徑 (A2) 確認報廢</h4>
+                <p>如果評估後<span class="highlight">無法</span>再用於其他專案。</p>
+                <ul>
+                    <li><strong>程序：</strong> 需檢附清單、照片等資料，填寫 <strong>FAD-35</strong>《在建工程廢料報廢申請書》辦理報廢。</li>
+                </ul>
+            </div>
+            
+            <div class="card card-3d">
+                <h3 class="card-title"><i class="fas fa-laptop"></i> B. 固定資產類 (Fixed Assets)</h3>
+                <p><strong>定義：</strong> 1.屬於固定資產的設備 (如1.建築物改良/裝潢。2.工程測量設備。3.業務展示設備。4.辦公室設備。5.個人電腦。6.非個人電腦。7.汽車)。2.在財務準則中，固定資產定義為每項成本超過新臺幣 20,000 元的資產。3.辦公室設備及傢俱耐用年限原定3年調整為5年。</p>
+                
+                <ul>
+                    <li><strong>路徑：</strong> 由使用單位或申請人填寫 <strong>FAD-18</strong>《固定資產報廢申請書》（Disposal of Fixed Assets）。</li>
+                    <li><strong>依循：</strong> 依據《財務部程序STE-FAD-PM-OO1》第四章《財務準則及程序》第五節《固定資產管理》相關規定辦理。</li>
+                    <li><em>注：</em> 如果資產因為業務或經濟原因導致無法使用且無殘值，需申請報廢。特定資產如個人電腦與非個人電腦報廢時，須經資訊管理人員確認機密資料已銷毀，始可核准。</li>
+                </ul>
+
+                <div class="sub-item">
+                    <div class="collapsible-header">
+                        <h4><i class="fas fa-server"></i> B-1. 資訊類報廢 (IT Assets)</h4>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="collapsible-content">
+                        <p><strong>定義：</strong> 資訊設備的報廢，包括伺服器、電腦、網路設備等。</p>
+                        <p><strong>依循：</strong> 需依據總公司《GITP-7 IT End User Policy》及 ITD《STE-IT-PM-001》等相關規定辦理，特別需要銷毀機密資料，確保數據安全。報廢及處置 (Condemnation or Disposal) 相關規定。</p>
+                        
+                        <p>報廢規定主要涉及含有公司資料的 IT 資產（包含運算裝置和行動裝置）在停止使用或轉移前的資料清除及處置要求，旨在確保數據安全。</p>
+                        
+                        <div class="sub-item">
+                            <div class="collapsible-header">
+                                <h4><i class="fas fa-shield-alt"></i> IT 資產（泛指所有 IT 設備）處置要求</h4>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="collapsible-content">
+                                <p>任何含有 ST Engineering 資料的 IT 資產（例如伺服器、PC、筆記型電腦等），在處置時必須遵守以下規定：</p>
+                                
+                                <ul>
+                                    <li><strong>安全處置方式：</strong>含有 ST Engineering 資料的 IT 資產應根據《集團數據生命週期政策》（GITP-6）中定義的技術，以安全方式處置。</li>
+                                    <li><strong>處置執行者：</strong> 資產處置應由 ST Engineering 的授權人員和/或廠商執行。</li>
+                                    <li><strong>記錄及盤點：</strong>每筆資產處置均應記錄，並更新資產盤點。</li>
+                                    <li><strong>清除資料義務：</strong>員工必須使用公司核准的方法，安全地清除行動裝置上留存的資料和資訊。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sub-item">
+                    <h4><i class="fas fa-exclamation-triangle"></i> B-2. 遭竊遺失</h4>
+                    <p>保管（使用）人員發現後，應立即通知公司所屬部門與財務部門，並向員警機關備案取得案件證明，依公司程序規定辦理補報與銷帳。</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title"><i class="fas fa-cogs"></i> 通用流程與最終處置</h2>
+            <p>無論是哪一類報廢物件，在確定報廢後，通常都需要經過以下標準化步驟：</p>
+            
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>物件分類與申請</h3>
+                    <p>各部門定期整理需報廢物件並分類，填寫對應表單並檢附清單、照片等佐證資料。</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>詢價與審核</h3>
+                    <p>採購部門統一向外部廠商詢價，使用單位填寫 QAD-028B《報廢費用審核表》完成內部審核。</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>執行報廢物件處理</h3>
+                    <p>依據詢價結果，以變賣、付費處理、銷毀或廢棄等方式執行，並留存處理憑證。</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>歸檔/結束</h3>
+                    <p>完成所有程序後，將表單、憑證等資料歸檔，財務部門完成資產銷帳，流程結束。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 互動式報廢流程 -->
+        <section class="interactive-flow-container">
+            <h2><i class="fas fa-project-diagram"></i> 互動式報廢處理流程</h2>
+            
+            <div class="flow-header">
+                <h1>互動式報廢處理流程</h1>
+                <p>依據《ISO9001:2015 Q3003》、財務部程序《STE-FAD-PM-001》第四章《財務準則及程序》第五節《固定資產管理》、總公司《GITP-7 IT End User Policy》及 ITD《STE-IT-PM-001》等相關規定辦理。</p>
+            </div>
+
+            <!-- Step 1: Asset Selection -->
+            <div class="asset-selection">
+                <h2>報廢物件類型</h2>
+                <p>點擊下方按鈕，將會顯示該類別的處理流程。</p>
+                <div class="selection-buttons">
+                    <button data-target="project" class="selection-btn">
+                        專案/在建工程材料
+                    </button>
+                    <button data-target="fixed" class="selection-btn">
+                        固定資產
+                    </button>
+                    <button data-target="it" class="selection-btn">
+                        固定資產 - 資訊設備
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Process Flow Display -->
+            <div class="process-flow-display">
+                <div id="flow-placeholder" class="flow-placeholder">
+                    <p>請先在上方選擇物件類型以查看對應流程。</p>
+                </div>
+                
+                <!-- Project Flow -->
+                <div id="project-flow" class="process-flow">
+                    <h3>專案/在建工程材料 處理流程</h3>
+                    <div class="flow-step">
+                        <span class="step-number">第一步</span>
+                        <h4>再利用評估</h4>
+                        <p>必須先評估材料是否可被其他專案使用。</p>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-step">
+                         <h4>評估結果為何？</h4>
+                         <div class="choice-buttons">
+                            <button id="reuse-yes" class="choice-btn yes">可再利用</button>
+                            <button id="reuse-no" class="choice-btn no">無法再利用</button>
+                         </div>
+                    </div>
+
+                    <div id="reuse-yes-path" class="hidden-step">
+                        <div class="flow-connector"></div>
+                        <div class="flow-step">
+                            <span class="step-number">後續程序</span>
+                            <h4>資產轉移或留置備用</h4>
+                            <p>填寫 <strong>QAD-27 B </strong>《在建工程餘料再利用評估申請書》，經他案專案經理確認後，辦理在建工程餘料轉移。</p>
+                            <p class="highlight">✅ 此流程結束 ✅</p>
+                        </div>
+                    </div>
+                    
+                    <div id="reuse-no-path" class="hidden-step">
+                        <div class="flow-connector"></div>
+                        <div class="flow-step">
+                            <span class="step-number">後續程序</span>
+                            <h4>進入正式報廢程序</h4>
+                            <p>填寫 <strong>FAD-35</strong> 在建工程廢料報廢申請書，進入通用最終處理程序。</p>
+                        </div>
+                        <div class="flow-connector"></div>
+                        <div class="flow-step">
+                            <h4>⬇️ 進入通用最終處理程序 ⬇️</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fixed Asset Flow -->
+                <div id="fixed-flow" class="process-flow">
+                    <h3>固定資產 處理流程</h3>
+                    <div class="flow-step">
+                        <span class="step-number">第一步</span>
+                        <h4>提出報廢申請</h4>
+                        <p>使用單位需填寫 <strong>FAD-18</strong> 固定資產報廢申請書。</p>
+                    </div>
+                     <div class="flow-connector"></div>
+                    <div class="flow-step">
+                        <span class="step-number">第二步</span>
+                        <h4>會計資產核銷</h4>
+                        <p>若資產已無殘值，會計人員必須核銷其資產所屬的餘額。</p>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-step">
+                        <h4>⬇️ 進入通用最終處理程序 ⬇️</h4>
+                    </div>
+                </div>
+
+                <!-- IT Flow -->
+                <div id="it-flow" class="process-flow">
+                    <h3>固定資產-資訊設備 處理流程</h3>
+                     <div class="flow-step">
+                        <span class="step-number">第一步</span>
+                        <h4>遵循固定資產程序</h4>
+                        <p>首先，依循固定資產報廢規定，填寫 <strong>FAD-18</strong> 固定資產報廢申請書並完成核銷。</p>
+                    </div>
+                     <div class="flow-connector"></div>
+                    <div class="flow-step">
+                        <span class="step-number special">特別要求</span>
+                        <h4>銷毀機密資料</h4>
+                        <p>在實體處理前，必須依據總公司《GITP-7 IT End User Policy》及 ITD《STE-IT-PM-001》等相關規定辦理，特別需要銷毀機密資料，確保數據安全。報廢及處置 (Condemnation or Disposal) 相關規定，完成設備內機密資料的銷毀步驟。</p>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-step">
+                        <h4>⬇️ 進入通用最終處理程序 ⬇️</h4>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Common Disposal -->
+            <div id="common-disposal" class="common-disposal">
+                 <h2>通用最終處理程序</h2>
+                 <p>所有報廢物件在完成報廢費用審核 (<strong>QAD-028B</strong>) 並經主管簽核後，由原申請人執行下列其中一種處理方式。注意：處理前須由採購部門統一向外部廠商詢價。</p>
+                 <div class="disposal-methods">
+                    <div class="disposal-method sell">
+                        <h4>變賣</h4>
+                        <p>若有變賣所得，須依《財務部程序》開立發票，且金額當天交由財務部入帳。</p>
+                    </div>
+                    <div class="disposal-method pay">
+                        <h4>付費處理</h4>
+                        <p>若處理過程需支付費用，則須依公司採購程序辦理。</p>
+                    </div>
+                    <div class="disposal-method destroy">
+                        <h4>銷毀或廢棄</h4>
+                        <p>需委由專業廠商辦理，並確保過程符合環保法規及廢棄物管理辦法。</p>
+                    </div>
+                    <div class="disposal-method offset">
+                        <h4>無須處理費用 (互抵)</h4>
+                        <p>廠商處理廢料與所得金額互抵，完成相關程序後資料進行歸檔。</p>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title"><i class="fas fa-question-circle"></i> Q&A 常見問題</h2>
+            
+            <div class="qa-item">
+                <div class="qa-question">問題1：專案類的「再利用」跟「報廢」差別在哪？</div>
+                <div class="qa-answer">答：區別在於該物件是否仍有價值或用途。如果<span class="highlight">有</span>，就走 QAD-27《餘料再利用評估》，目的是<span class="highlight">資產轉移</span>，留置備用；如果<span class="highlight">沒有</span>，就走 FAD-35《廢料報廢申請書》，目的是<span class="highlight">處置銷毀或變賣</span>。</div>
+            </div>
+            
+            <div class="qa-item">
+                <div class="qa-question">問題2：固定資產報廢的依據有哪些？</div>
+                <div class="qa-answer">答：固定資產的報廢必須遵循公司的《財務部程序STE-FAD-PM-OO1》第四章《財務準則及程序》第五節《固定資產管理》相關規定。這涉及到資產的原始成本、殘值和折舊管理，僅當資產失去功能且無殘值時，才可申請報廢（使用FAD-18表單）。另外針對資訊設備的報廢，包括伺服器、電腦、網路設備等，還需依據總公司《GITP-7 IT End User Policy》及 ITD《STE-IT-PM-001》等相關規定辦理，特別需要銷毀機密資料，確保數據安全。報廢及處置 (Condemnation or Disposal) 相關規定辦理。</div>
+            </div>
+            
+            <div class="qa-item">
+                <div class="qa-question">問題3：報廢流程中各部門的職責是什麼？</div>
+                <div class="qa-answer">
+                    <ul>
+                        <li><strong>使用單位/申請人：</strong> 提出報廢申請，提供物件資訊與佐證資料。</li>
+                        <li><strong>採購部：</strong> 統一向外部廠商詢價，提供報廢處理費用參考。</li>
+                        <li><strong>審核部門：</strong> 部門主管、專案經理、品保部負責流程見證及總經理簽核。</li>
+                        <li><strong>財務部：</strong> 處理變賣款項入帳、填寫原始成本、完成資產轉移或銷帳。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="qa-item">
+                <div class="qa-question">問題4: 報廢所需附件</div>
+                <div class="qa-answer">
+                    <p>1. 報廢前:製作報廢數量表及照片清冊，並填寫 FAD-35《Disposal of WIP Wasted Material 在建工程廢料報廢申請書》。</p>
+                    <p>2. 過程中:1.拍攝前、中、後(場地復原)照片(含日期)及2.清運業者回收四聯單/收執聯證明(委由專業廠商辦理，並且必須符合環保法規及廢棄物管理辦法。)</p>
+                    <p>3. 報廢後:繳交CHECKLIST查對表及相關前、中、後佐證照片。</p>
+                    <p>4. 待完成所有程序後，將表單、憑證等資料歸檔，財務部門完成資產銷帳，流程結束。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card card-3d">
+            <h2 class="card-title"><i class="fas fa-check-circle"></i> 總結</h2>
+            <p>依據ISO9001:2015 Q3003報廢管理辦法、《財務部程序STE-FAD-PM-OO1》第四章《財務準則及程序》第五節《固定資產管理》、總公司《GITP-7 IT End User Policy》及 ITD《STE-IT-PM-001》等相關規定，本系統提供了嚴格的標準化流程，確保公司閒置、損壞或老舊物品能被合規且有效地處理。</p>
+            <p><strong>核心流程差異：</strong></p>
+            <p>所有報廢程序的核心共同點是：<span class="highlight">分類、申請、詢價、核准、執行處置，並確保符合環保與財務法規</span>。此外，固定資產處分需遵循嚴謹的財務準則，資訊設備報廢需強化數據銷毀，專案類則優先評估再利用。</p>
+        </section>
+
+        <section>
+            <h2 class="section-title"><i class="fas fa-table"></i> 流程對照表</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>物件類型</th>
+                            <th>評估流程</th>
+                            <th>使用表單</th>
+                            <th>最終處理</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>專案/在建工程材料</td>
+                            <td>優先評估是否可「再利用」（QAD-27），無法利用則報廢</td>
+                            <td>1. QAD-027B 《在建工程餘料再利用評估申請表》 或2. FAD-35D Disposal Of Wip Waste Material《在建工程廢料報廢申請表 》。</td>
+                            <td>1.經他案專案經理確認有用者，物件將辦理在建工程餘料轉移，留置備用。
+2. 若評估「無法再利用」辦理報廢。</td>
+                        </tr>
+                        <tr>
+                            <td>固定資產</td>
+                            <td>評估是否因業務原因導致無法使用且無殘值</td>
+                            <td>1. FAD-31《固定資產處份申請表》、FAD-33C FIXED ASSETS TRANSFER FORM固 定 資 產 移 轉 申 請 表及2. FAD-18D Disposal Of Fixed Assets固定資產報廢申請表。</td>
+                            <td>1.若固定資產因業務或經濟因素已不能使用且無殘值時，辦理報廢。會計人員必須核銷其資產所屬的餘額。
+2. 如果報廢物件有取得價金（變賣所得金額），須依《財務管理手冊》開立發票。款項必須當天交由財務部入帳。</td>
+                        </tr>
+                        <tr>
+                            <td>固定資產-資訊設備</td>
+                            <td>遵守IT程序，確認機密資料銷毀後報廢</td>
+                            <td>FAD-18 (報廢)</td>
+                            <td>銷毀後報廢</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title"><i class="fas fa-file-alt"></i> 現行報廢程序表格</h2>
+            <div class="form-links">
+                <a href="https://i.urusai.cc/UolUz.pdf" class="form-link" target="_blank">
+                    <div class="form-icon"><i class="fas fa-file-pdf"></i></div>
+                    <div class="form-info">
+                        <h3>FAD-18D 固定資產報廢申請表</h3>
+                        <p>Disposal Of Fixed Assets</p>
+                    </div>
+                </a>
+                
+                <a href="https://i.urusai.cc/toaA3.pdf" class="form-link" target="_blank">
+                    <div class="form-icon"><i class="fas fa-file-contract"></i></div>
+                    <div class="form-info">
+                        <h3>FAD-31D 固定資產處分申請表</h3>
+                        <p>Write Off Of Fixed Assets</p>
+                    </div>
+                </a>
+                
+                <a href="https://i.urusai.cc/GjmAl.pdf" class="form-link" target="_blank">
+                    <div class="form-icon"><i class="fas fa-exchange-alt"></i></div>
+                    <div class="form-info">
+                        <h3>FAD-33C 固定資產移轉申請表</h3>
+                        <p>Fixed Assets Transfer Form</p>
+                    </div>
+                </a>
+                
+                <a href="https://i.urusai.cc/6qlCj.pdf" class="form-link" target="_blank">
+                    <div class="form-icon"><i class="fas fa-trash-alt"></i></div>
+                    <div class="form-info">
+                        <h3>FAD-35D 在建工程廢料報廢申請表</h3>
+                        <p>Disposal Of Wip Waste Material</p>
+                    </div>
+                </a>
+                
+                <a href="https://i.urusai.cc/klqIo.pdf" class="form-link" target="_blank">
+                    <div class="form-icon"><i class="fas fa-recycle"></i></div>
+                    <div class="form-info">
+                        <h3>QAD-027B 在建工程餘料再利用評估申請表</h3>
+                        <p>餘料再利用評估</p>
+                    </div>
+                </a>
+                
+                <a href="https://i.urusai.cc/GU6Wp.pdf" class="form-link" target="_blank">
+                    <div class="form-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="form-info">
+                        <h3>QAD-028B 報廢費用審核表</h3>
+                        <p>報廢費用審核</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+        
+        <footer>
+            <img src="https://i.urusai.cc/GXiu2.png" alt="公司STE NAME" class="ste-name-img">
+            <p>臺灣新鈳電子股份有限公司 | 報廢程序 | 品保部</p>
+        </footer>
+    </div>
+
+    <!-- 引入 particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化粒子背景
+            particlesJS('particles-js', {
+                particles: {
+                    number: {
+                        value: 80,
+                        density: {
+                            enable: true,
+                            value_area: 800
+                        }
+                    },
+                    color: {
+                        value: "#00ffff"
+                    },
+                    shape: {
+                        type: "circle",
+                        stroke: {
+                            width: 0,
+                            color: "#000000"
+                        }
+                    },
+                    opacity: {
+                        value: 0.5,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 1,
+                            opacity_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    size: {
+                        value: 3,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 2,
+                            size_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#00ffff",
+                        opacity: 0.4,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 1,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false,
+                        attract: {
+                            enable: false,
+                            rotateX: 600,
+                            rotateY: 1200
+                        }
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: {
+                            enable: true,
+                            mode: "grab"
+                        },
+                        onclick: {
+                            enable: true,
+                            mode: "push"
+                        },
+                        resize: true
+                    },
+                    modes: {
+                        grab: {
+                            distance: 140,
+                            line_linked: {
+                                opacity: 1
+                            }
+                        },
+                        push: {
+                            particles_nb: 4
+                        }
+                    }
+                },
+                retina_detect: true
+            });
+
+            // 可見性觀察器 - 用於滾動顯示動畫
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.card, .section-title, .table-container, .form-link, .qa-item, .interactive-flow-container').forEach(el => {
+                observer.observe(el);
+            });
+
+            // 可收合式對話方塊功能 - 支援嵌套
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    content.classList.toggle('active');
+                });
+            });
+
+            // 預設展開資訊類報廢及其子內容
+            const mainCollapsible = document.querySelector('.collapsible-header');
+            if (mainCollapsible) {
+                mainCollapsible.classList.add('active');
+                const mainContent = mainCollapsible.nextElementSibling;
+                if (mainContent) {
+                    mainContent.classList.add('active');
+                    
+                    // 展開子級可收合內容
+                    const subCollapsible = mainContent.querySelector('.collapsible-header');
+                    if (subCollapsible) {
+                        subCollapsible.classList.add('active');
+                        const subContent = subCollapsible.nextElementSibling;
+                        if (subContent) {
+                            subContent.classList.add('active');
+                        }
+                    }
+                }
+            }
+
+            // 互動式流程功能
+            const selectionButtons = document.querySelectorAll('.selection-btn');
+            const flowPlaceholder = document.getElementById('flow-placeholder');
+            const processFlows = {
+                project: document.getElementById('project-flow'),
+                fixed: document.getElementById('fixed-flow'),
+                it: document.getElementById('it-flow')
+            };
+            const commonDisposalSection = document.getElementById('common-disposal');
+            
+            const reuseYesBtn = document.getElementById('reuse-yes');
+            const reuseNoBtn = document.getElementById('reuse-no');
+            const reuseYesPath = document.getElementById('reuse-yes-path');
+            const reuseNoPath = document.getElementById('reuse-no-path');
+
+            let activeFlow = null;
+
+            function resetAllFlows() {
+                Object.values(processFlows).forEach(flow => {
+                    if (flow) flow.classList.remove('active');
+                });
+                if (reuseYesPath) {
+                    reuseYesPath.classList.remove('visible-step');
+                    reuseYesPath.classList.add('hidden-step');
+                }
+                if (reuseNoPath) {
+                    reuseNoPath.classList.remove('visible-step');
+                    reuseNoPath.classList.add('hidden-step');
+                }
+                if (commonDisposalSection) commonDisposalSection.classList.remove('active');
+                selectionButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+
+            if (selectionButtons.length > 0) {
+                selectionButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const target = button.dataset.target;
+                        
+                        if (activeFlow === target) {
+                            activeFlow = null;
+                            resetAllFlows();
+                            flowPlaceholder.classList.remove('hidden');
+                        } else {
+                            activeFlow = target;
+                            resetAllFlows();
+                            flowPlaceholder.classList.add('hidden');
+                            
+                            if (processFlows[target]) {
+                                processFlows[target].classList.add('active');
+                            }
+                            button.classList.add('active');
+                            
+                            if (target !== 'project') {
+                                if (commonDisposalSection) commonDisposalSection.classList.add('active');
+                            } else {
+                                // For project, common disposal visibility is handled by reuse buttons
+                                if (reuseYesPath) {
+                                    reuseYesPath.classList.add('hidden-step');
+                                }
+                                if (reuseNoPath) {
+                                    reuseNoPath.classList.add('hidden-step');
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+
+            if (reuseYesBtn && reuseNoBtn) {
+                reuseYesBtn.addEventListener('click', () => {
+                    if (reuseYesPath) {
+                        reuseYesPath.classList.add('visible-step');
+                        reuseYesPath.classList.remove('hidden-step');
+                    }
+                    if (reuseNoPath) {
+                        reuseNoPath.classList.add('hidden-step');
+                        reuseNoPath.classList.remove('visible-step');
+                    }
+                    if (commonDisposalSection) commonDisposalSection.classList.remove('active');
+                });
+
+                reuseNoBtn.addEventListener('click', () => {
+                    if (reuseNoPath) {
+                        reuseNoPath.classList.add('visible-step');
+                        reuseNoPath.classList.remove('hidden-step');
+                    }
+                    if (reuseYesPath) {
+                        reuseYesPath.classList.add('hidden-step');
+                        reuseYesPath.classList.remove('visible-step');
+                    }
+                    if (commonDisposalSection) commonDisposalSection.classList.add('active');
+                });
+            }
+
+            // 3D棱鏡動畫效果
+            const initPrismAnimation = () => {
+                const container = document.getElementById('prism-container');
+                if (!container) return;
+
+                const config = {
+                    height: 3.5,
+                    baseWidth: 5.5,
+                    animationType: '3drotate',
+                    glow: 1.2,
+                    offset: { x: 0, y: 0 },
+                    noise: 0.3,
+                    transparent: true,
+                    scale: 3.2,
+                    hueShift: 0.2,
+                    colorFrequency: 1.2,
+                    hoverStrength: 2,
+                    inertia: 0.05,
+                    bloom: 1.5,
+                    timeScale: 0.4
+                };
+
+                const dpr = Math.min(2, window.devicePixelRatio || 1);
+                const renderer = new ogl.Renderer({
+                    dpr,
+                    alpha: config.transparent,
+                    antialias: false
+                });
+                const gl = renderer.gl;
+                gl.disable(gl.DEPTH_TEST);
+                gl.disable(gl.CULL_FACE);
+                gl.disable(gl.BLEND);
+                container.appendChild(gl.canvas);
+
+                const vertexShader = `
+                    attribute vec2 position;
+                    void main() {
+                        gl_Position = vec4(position, 0.0, 1.0);
+                    }
+                `;
+                const fragmentShader = `
+                    precision highp float;
+                    uniform vec2  iResolution;
+                    uniform float iTime;
+                    uniform float uHeight;
+                    uniform float uBaseHalf;
+                    uniform mat3  uRot;
+                    uniform int   uUseBaseWobble;
+                    uniform float uGlow;
+                    uniform vec2  uOffsetPx;
+                    uniform float uNoise;
+                    uniform float uSaturation;
+                    uniform float uScale;
+                    uniform float uHueShift;
+                    uniform float uColorFreq;
+                    uniform float uBloom;
+                    uniform float uCenterShift;
+                    uniform float uInvBaseHalf;
+                    uniform float uInvHeight;
+                    uniform float uMinAxis;
+                    uniform float uPxScale;
+                    uniform float uTimeScale;
+
+                    vec4 tanh4(vec4 x){
+                        vec4 e2x = exp(2.0*x);
+                        return (e2x - 1.0) / (e2x + 1.0);
+                    }
+                    float rand(vec2 co){
+                        return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453123);
+                    }
+                    float sdOctaAnisoInv(vec3 p){
+                        vec3 q = vec3(abs(p.x)*uInvBaseHalf, abs(p.y)*uInvHeight, abs(p.z)*uInvBaseHalf);
+                        float m = q.x + q.y + q.z - 1.0;
+                        return m * uMinAxis * 0.5773502691896258;
+                    }
+                    float sdPyramidUpInv(vec3 p){
+                        float oct = sdOctaAnisoInv(p);
+                        float halfSpace = -p.y;
+                        return max(oct, halfSpace);
+                    }
+                    mat3 hueRotation(float a){
+                        float c = cos(a), s = sin(a);
+                        mat3 W = mat3(0.299,0.587,0.114, 0.299,0.587,0.114, 0.299,0.587,0.114);
+                        mat3 U = mat3(0.701,-0.587,-0.114, -0.299,0.413,-0.114, -0.300,-0.588,0.886);
+                        mat3 V = mat3(0.168,-0.331,0.500, 0.328,0.035,-0.500, -0.497,0.296,0.201);
+                        return W + U * c + V * s;
+                    }
+                    void main(){
+                        vec2 f = (gl_FragCoord.xy - 0.5*iResolution.xy - uOffsetPx) * uPxScale;
+                        float z = 5.0;
+                        float d = 0.0;
+                        vec3 p;
+                        vec4 o = vec4(0.0);
+                        float centerShift = uCenterShift;
+                        float cf = uColorFreq;
+
+                        mat2 wob = mat2(1.0);
+                        if(uUseBaseWobble == 1){
+                            float t = iTime * uTimeScale;
+                            float c0 = cos(t+0.0);
+                            float c1 = cos(t+33.0);
+                            float c2 = cos(t+11.0);
+                            wob = mat2(c0,c1,c2,c0);
+                        }
+
+                        const int STEPS = 100;
+                        for(int i=0; i<STEPS; i++){
+                            p = vec3(f, z);
+                            p.xz = p.xz * wob;
+                            p = uRot * p;
+                            vec3 q = p;
+                            q.y += centerShift;
+                            d = 0.1 + 0.2*abs(sdPyramidUpInv(q));
+                            z -= d;
+                            o += (sin((p.y + z)*cf + vec4(0.0,1.0,2.0,3.0)) + 1.0)/d;
+                        }
+
+                        o = tanh4(o*o*(uGlow*uBloom)/1e5);
+                        vec3 col = o.rgb;
+                        float n = rand(gl_FragCoord.xy + vec2(iTime));
+                        col += (n-0.5)*uNoise;
+                        col = clamp(col, 0.0, 1.0);
+                        float L = dot(col, vec3(0.2126,0.7152,0.0722));
+                        col = clamp(mix(vec3(L), col, uSaturation), 0.0, 1.0);
+                        if(abs(uHueShift) > 0.0001){
+                            col = clamp(hueRotation(uHueShift)*col, 0.0, 1.0);
+                        }
+                        gl_FragColor = vec4(col, o.a);
+                    }
+                `;
+
+                const geometry = new ogl.Triangle(gl);
+                const program = new ogl.Program(gl, {
+                    vertex: vertexShader,
+                    fragment: fragmentShader,
+                    uniforms: {
+                        iResolution: { value: new Float32Array(2) },
+                        iTime: { value: 0 },
+                        uHeight: { value: config.height },
+                        uBaseHalf: { value: config.baseWidth * 0.5 },
+                        uUseBaseWobble: { value: config.animationType === 'rotate' ? 1 : 0 },
+                        uRot: { value: new Float32Array([1,0,0, 0,1,0, 0,0,1]) },
+                        uGlow: { value: config.glow },
+                        uOffsetPx: { value: new Float32Array([config.offset.x, config.offset.y]) },
+                        uNoise: { value: config.noise },
+                        uSaturation: { value: config.transparent ? 1.5 : 1 },
+                        uScale: { value: config.scale },
+                        uHueShift: { value: config.hueShift },
+                        uColorFreq: { value: config.colorFrequency },
+                        uBloom: { value: config.bloom },
+                        uCenterShift: { value: config.height * 0.25 },
+                        uInvBaseHalf: { value: 1 / (config.baseWidth * 0.5) },
+                        uInvHeight: { value: 1 / config.height },
+                        uMinAxis: { value: Math.min(config.baseWidth * 0.5, config.height) },
+                        uPxScale: { value: 1 / ((gl.drawingBufferHeight || 1) * 0.1 * config.scale) },
+                        uTimeScale: { value: config.timeScale }
+                    }
+                });
+                const mesh = new ogl.Mesh(gl, { geometry, program });
+
+                const resize = () => {
+                    const w = container.clientWidth;
+                    const h = container.clientHeight;
+                    renderer.setSize(w, h);
+                    program.uniforms.iResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight];
+                    program.uniforms.uPxScale.value = 1 / ((gl.drawingBufferHeight || 1) * 0.1 * config.scale);
+                };
+                window.addEventListener('resize', resize);
+                resize();
+
+                const setMat3FromEuler = (yawY, pitchX, rollZ, out) => {
+                    const cy = Math.cos(yawY), sy = Math.sin(yawY);
+                    const cx = Math.cos(pitchX), sx = Math.sin(pitchX);
+                    const cz = Math.cos(rollZ), sz = Math.sin(rollZ);
+                    out[0] = cy*cz + sy*sx*sz;
+                    out[1] = cx*sz;
+                    out[2] = -sy*cz + cy*sx*sz;
+                    out[3] = -cy*sz + sy*sx*cz;
+                    out[4] = cx*cz;
+                    out[5] = sy*sz + cy*sx*cz;
+                    out[6] = sy*cx;
+                    out[7] = -sx;
+                    out[8] = cy*cx;
+                    return out;
+                };
+
+                let yaw = 0, pitch = 0, roll = 0;
+                const rotBuf = new Float32Array(9);
+                const t0 = performance.now();
+                const render = (t) => {
+                    requestAnimationFrame(render);
+                    const time = (t - t0) * 0.001;
+                    program.uniforms.iTime.value = time;
+
+                    if (config.animationType === '3drotate') {
+                        const tScaled = time * config.timeScale;
+                        yaw = tScaled * 0.5;
+                        pitch = Math.sin(tScaled * 0.3) * 0.6;
+                        roll = Math.sin(tScaled * 0.2) * 0.5;
+                        program.uniforms.uRot.value = setMat3FromEuler(yaw, pitch, roll, rotBuf);
+                    }
+
+                    renderer.render({ scene: mesh });
+                };
+                render();
+            };
+
+            initPrismAnimation();
+        });
+    </script>
+</body>
+</html>
